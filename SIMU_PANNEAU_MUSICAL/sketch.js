@@ -2,13 +2,20 @@ let nombreLEDs = [17,10];
 let resolution = 50;
 let pingPongBallSize = 14;
 
-let t = 0;
+let audioSpectrum;
+let bassVolume = 0;
+
+let defaultLEDColor = [50,50,200]; // Si couleur = (0,0,0), led éteinte par défaut
+
+let t = 0; // Augmente en f° des aigus
+let t_special = 0; // Augmente en f° des graves
 let timeIncrement = 0.0001;
 
 
 let fontOG;
 
 let sounds_mp3 = ["Fatima Yamaha - Whats a girl to do.mp3", "Fatima Yamaha - Whats a girl to do.mp3", "Yaeji - Raingurl.mp3","Justice - Genesis.mp3", "MIA - Paper Planes.mp3"];
+sounds_mp3 = ["MIA - Paper Planes.mp3", "MIA - Paper Planes.mp3"];
 let sounds = [];
 let sonChoisi;
 
@@ -44,6 +51,7 @@ class LED{
         this.position = [leftTopCorner[0] + this.positionMat[0]*ecart[0], leftTopCorner[1] + this.positionMat[1]*ecart[1]]; // Position sur l'écran (découle de la position sur la matrice)
         this.size = LEDSize;
         this.isOn = true;
+		this.colorSum = 0; // Permet d'avoir un équivalent de la luminosité de la LED, pour définir le rayon du halo lumineux.
     }
     
     showLED(){
@@ -51,12 +59,24 @@ class LED{
         noStroke();
         if(this.isOn){
             this.newColor = color(red(this.color),green(this.color),blue(this.color),30);
-            fill(this.newColor);
-            ellipse(this.position[0] , this.position[1], this.size*5, this.size*5); // Créer l'effet de halo
+			this.colorSum = map( red(this.color) + green(this.color) + blue(this.color), 0, 400, 0, 100)*0.01; 
+			fill(this.newColor);
+            ellipse(this.position[0] , this.position[1], this.size*5*this.colorSum, this.size*5*this.colorSum); // Créer l'effet de halo
+
+			fill(this.color);
+			ellipse(this.position[0] , this.position[1], this.size, this.size);
         }
         
-        fill(this.color);
-        ellipse(this.position[0] , this.position[1], this.size, this.size);
+		else{
+			this.newColor = color(defaultLEDColor[0],defaultLEDColor[1],defaultLEDColor[2],30);
+			this.colorSum = map( defaultLEDColor[0] + defaultLEDColor[1] + defaultLEDColor[2], 0, 400, 0, 100)*0.01; 
+			fill(this.newColor);
+            ellipse(this.position[0] , this.position[1], this.size*2*this.colorSum + bassVolume*2, this.size*2*this.colorSum + bassVolume*2); // Créer l'effet de halo
+
+			fill(color(defaultLEDColor[0], defaultLEDColor[1], defaultLEDColor[2]));
+			ellipse(this.position[0] , this.position[1], this.size, this.size);
+		}
+        
                 
     }
     
@@ -101,10 +121,10 @@ class CornerLine{
                this.a = 1;
                break;
             default:
-                print("CornerLine :: lineType doit être compris entre 1 et 4!");
-       }  
+                print("CornerLine :: lineType doit être compris entre 1 et 4 !");
+		}  
 
-   }
+	}
     
     updateLine(showPrimitive){
         
@@ -207,6 +227,8 @@ function setup() {
 
 function draw() {
 
+	audioSpectrum = fft.analyze();
+
     background(bgColor);
     image(bgImg, 0, 0);
     
@@ -243,10 +265,18 @@ function draw() {
     
     image(bgImgAlpha, 0, 0); // Affichage du pian's DJ à l'avant plan
     
-    drawSpectrum(); // Affichage du spectre audio
+    //drawSpectrum(); // Affichage du spectre audio
     drawVolume(); // Affichage numérique du volume
     
-    t += timeIncrement*3000 + int(timeIncrement*fft.getEnergy("mid","treble")*sq(fft.getEnergy("treble")*0.6)*0.01);
+    t += timeIncrement*3000 + int(timeIncrement*fft.getEnergy("mid","treble")*sq(fft.getEnergy("treble")*0.6)*0.02);
+	t_special += bassVolume;
+
+	if( int(t_special/100)%2 == 0){
+		defaultLEDColor = [255,255,0];
+	}
+	else{
+		defaultLEDColor = [50,50,200];
+	}
     
 }
 
@@ -335,7 +365,6 @@ function turnOffAllLEDs(){
 
 
 function drawSpectrum(){
-    let spectrum = fft.analyze();
     stroke(colorGraph);
     fill(colorGraph);
     for (let i = 0; i< int(spectrum.length*0.8); i++){ // *0.8 pour prendre que les 80% des fréquences les plus basses du spectre audible
@@ -358,9 +387,20 @@ function drawSpectrum(){
 
 function drawVolume(){
     let posTextVolume = [830,630];
+	fill(30);
     textSize(30);
     textFont(fontOG);
     text("Mid+ Volume : " + int(fft.getEnergy("mid","treble")), posTextVolume[0], posTextVolume[1] );
+
+	posTextVolume = [830,680];
+	fill(30);
+    textSize(30);
+    textFont(fontOG);
+	bassVolume = int(fft.getEnergy("bass")-240);
+	if (bassVolume < 0){
+		bassVolume = 0;
+	}
+    text("Low Volume : " + bassVolume, posTextVolume[0], posTextVolume[1] );
     
 }
 
