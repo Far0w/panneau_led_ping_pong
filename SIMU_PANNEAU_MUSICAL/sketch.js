@@ -5,7 +5,7 @@ let pingPongBallSize = 14;
 let audioSpectrum;
 let bassVolume = 0;
 
-let defaultLEDColor = [50,50,200]; // Si couleur = (0,0,0), led éteinte par défaut
+let defaultLEDColor = [50,255,50]; // Si couleur = (0,0,0), led éteinte par défaut
 
 let t = 0; // Augmente en f° des aigus
 let t_special = 0; // Augmente en f° des graves
@@ -215,7 +215,7 @@ function setup() {
     cornerLines[2] = new CornerLine(1,30, 290);
     cornerLines[3] = new CornerLine(3,30, 200);
     
-    fft = new p5.FFT(0.93,64);
+    fft = new p5.FFT(0.7,64);
     createTableauLED();
     updateMatrix(cornerLines);
     
@@ -275,7 +275,7 @@ function draw() {
 		defaultLEDColor = [255,255,0];
 	}
 	else{
-		defaultLEDColor = [50,50,200];
+		defaultLEDColor = [50,255,50];
 	}
     
 }
@@ -326,7 +326,7 @@ function updateMatrix(listeFigures){
         for (let CaseX = 0; CaseX < nombreLEDs[0]; CaseX ++){
             for (let CaseY = 0; CaseY < nombreLEDs[1]; CaseY ++){
                 if(distanceCaseDroite(tableauLED[CaseX][CaseY], selectedLineSlope, selectedLineB) < 20){ // 20 : déterminé arbitrairement
-                   tableauLED[CaseX][CaseY].updateColor(color(255,0,0));
+                   tableauLED[CaseX][CaseY].updateColor(color(255,0,215));
                    }
                 /*else{
                    tableauCase[CaseX][CaseY].updateColor(color(0,0,0)); 
@@ -404,7 +404,7 @@ function drawVolume(){
     
 }
 
-function drawLine(a,b, lineColor = color(225,20,20,100)){ //Dessine une ligne d'équation y = a*x + b
+function drawLine(a,b, lineColor = color(255,20,20,100)){ //Dessine une ligne d'équation y = a*x + b
     stroke(lineColor);
     strokeWeight(10);
     line(0,b,nombreLEDs[0]*resolution, a*nombreLEDs[0]*resolution + b);
