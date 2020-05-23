@@ -15,7 +15,7 @@ let timeIncrement = 0.0001;
 let fontOG;
 
 let sounds_mp3 = ["Fatima Yamaha - Whats a girl to do.mp3", "Fatima Yamaha - Whats a girl to do.mp3", "Yaeji - Raingurl.mp3","Justice - Genesis.mp3", "MIA - Paper Planes.mp3"];
-sounds_mp3 = ["MIA - Paper Planes.mp3", "MIA - Paper Planes.mp3"];
+//sounds_mp3 = ["MIA - Paper Planes.mp3", "MIA - Paper Planes.mp3"];
 let sounds = [];
 let sonChoisi;
 
@@ -215,7 +215,7 @@ function setup() {
     cornerLines[2] = new CornerLine(1,30, 290);
     cornerLines[3] = new CornerLine(3,30, 200);
     
-    fft = new p5.FFT(0.7,64);
+    fft = new p5.FFT(0.85,64);
     createTableauLED();
     updateMatrix(cornerLines);
     
